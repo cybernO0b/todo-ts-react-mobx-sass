@@ -3,7 +3,7 @@ import axios from "axios";
 
 export interface ITodo {
   id: number;
-  userId: number;
+  
   title: string;
   completed: boolean;
 }
@@ -13,6 +13,12 @@ export class TodoStore {
 
   constructor() {
     makeAutoObservable(this);
+    this.loadTodos();
+  }
+
+  async loadTodos() {
+    const response = await axios.get<ITodo[]>("https://jsonplaceholder.typicode.com/todos");
+    this.todos = response.data;
   }
 
   async fetchTodos() {
@@ -25,6 +31,15 @@ export class TodoStore {
       console.log(error);
     }
   }
+
+  addTodo = (title: string) => {
+    const newTodo: ITodo = {
+      id: this.todos.length + 1,
+      title,
+      completed: false,
+    };
+    this.todos.push(newTodo);
+  };
 
   get completedTodos() {
     return this.todos.filter((todo) => todo.completed);
@@ -41,15 +56,7 @@ export class TodoStore {
     }
   }
 
-  addTodo = (title: string) => {
-    const newTodo = {
-      userId: 1,
-      id: Date.now(),
-      title,
-      completed: false,
-    };
-    this.todos.push(newTodo);
-  };
+
 
   deleteTodo = (id: number) => {
     this.todos = this.todos.filter((todo) => todo.id !== id);
